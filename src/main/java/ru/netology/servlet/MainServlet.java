@@ -14,7 +14,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MainServlet extends HttpServlet {
     private final Map<String, Map<String, Handler>> handlers = new ConcurrentHashMap<>();
-
+    private final static String methodGet = "GET";
+    private final static String methodPost = "POST";
+    private final static String methodDelete = "DELETE";
+    private final static String pathApiPosts = "/api/posts";
     private PostController controller;
 
     @Override
@@ -24,21 +27,21 @@ public class MainServlet extends HttpServlet {
         controller = new PostController(service);
 
 
-        addHandler("GET", "api/posts", (((path, req, resp) -> {
+        addHandler(methodGet, pathApiPosts, (((path, req, resp) -> {
             controller.all(resp);
         })));
-        addHandler("GET", "/api/posts/", ((path, req, resp) -> {
+        addHandler(methodGet, pathApiPosts + "/", ((path, req, resp) -> {
             final var id = Long.parseLong(path.substring(path.lastIndexOf("/") + 1));
             controller.getById(id, resp);
         }));
-        addHandler("POST", "/api/posts", ((path, req, resp) -> {
+        addHandler(methodPost, pathApiPosts, ((path, req, resp) -> {
             try {
                 controller.save(req.getReader(), resp);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }));
-        addHandler("DELETE", "/api/posts/", ((path, req, resp) -> {
+        addHandler(methodDelete, pathApiPosts + "/", ((path, req, resp) -> {
             final var id = Long.parseLong(path.substring(path.lastIndexOf("/") + 1));
             controller.removeById(id, resp);
         }));
@@ -53,21 +56,21 @@ public class MainServlet extends HttpServlet {
             final var method = req.getMethod();
 
             // primitive routing
-            if (method.equals("GET") && path.equals("/api/posts")) {
+            if (method.equals(methodGet) && path.equals(pathApiPosts)) {
                 controller.all(resp);
                 return;
             }
-            if (method.equals("GET") && path.matches("/api/posts/\\d+")) {
+            if (method.equals(methodGet) && path.matches(pathApiPosts + "/\\d+")) {
                 // easy way
                 final var id = Long.parseLong(path.substring(path.lastIndexOf("/")));
                 controller.getById(id, resp);
                 return;
             }
-            if (method.equals("POST") && path.equals("/api/posts")) {
+            if (method.equals(methodPost) && path.equals(pathApiPosts)) {
                 controller.save(req.getReader(), resp);
                 return;
             }
-            if (method.equals("DELETE") && path.matches("/api/posts/\\d+")) {
+            if (method.equals(methodDelete) && path.matches(pathApiPosts + "/\\d+")) {
                 // easy way
                 final var id = Long.parseLong(path.substring(path.lastIndexOf("/")));
                 controller.removeById(id, resp);
