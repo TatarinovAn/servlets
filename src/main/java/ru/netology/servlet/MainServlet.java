@@ -1,5 +1,6 @@
 package ru.netology.servlet;
 
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import ru.netology.controller.PostController;
 import ru.netology.handler.Handler;
 import ru.netology.repository.PostRepository;
@@ -20,12 +21,11 @@ public class MainServlet extends HttpServlet {
     private final static String pathApiPosts = "/api/posts";
     private PostController controller;
 
+
     @Override
     public void init() {
-        final var repository = new PostRepository();
-        final var service = new PostService(repository);
-        controller = new PostController(service);
-
+        final var context = new AnnotationConfigApplicationContext("ru.netology");
+        controller = context.getBean(PostController.class);
 
         addHandler(methodGet, pathApiPosts, (((path, req, resp) -> {
             controller.all(resp);
