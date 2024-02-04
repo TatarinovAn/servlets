@@ -1,6 +1,7 @@
 package ru.netology.controller;
 
 import com.google.gson.Gson;
+import org.springframework.web.bind.annotation.*;
 import ru.netology.model.Post;
 import ru.netology.service.PostService;
 
@@ -8,23 +9,28 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Reader;
 
+@RestController
+@RequestMapping("/api/posts")
 public class PostController {
     public static final String APPLICATION_JSON = "application/json";
     private final PostService service;
-    private Gson gson = new Gson();
+    private final Gson gson = new Gson();
 
     public PostController(PostService service) {
         this.service = service;
     }
 
+    @GetMapping
     public void all(HttpServletResponse response) {
         senderResponse(response, service.all());
     }
 
-    public void getById(long id, HttpServletResponse response) {
+    @GetMapping("/{id}")
+    public void getById(@PathVariable long id, HttpServletResponse response) {
         senderResponse(response, service.getById(id));
     }
 
+    @PostMapping
     public void save(Reader body, HttpServletResponse response) {
 
         final var data = gson.fromJson(body, Post.class);
@@ -33,7 +39,8 @@ public class PostController {
 
     }
 
-    public void removeById(long id, HttpServletResponse response) {
+    @DeleteMapping("/{id}")
+    public void removeById(@PathVariable long id, HttpServletResponse response) {
 
         service.removeById(id);
         try {
